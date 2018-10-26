@@ -1,4 +1,4 @@
-# Docker Compose file for ELK stack
+# Docker-Compose file for ELK stack
 
 # Build with:
 # docker-compose build elk
