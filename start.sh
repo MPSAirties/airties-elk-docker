@@ -2,8 +2,6 @@
 #
 # /usr/local/bin/start.sh
 # Start Elasticsearch, Logstash and Kibana services
-#
-# spujadas 2015-10-09; added initial pidfile removal and graceful termination
 
 # WARNING - This script assumes that the ELK services are not running, and is
 #   only expected to be run once, when the container is started.
@@ -25,9 +23,6 @@ trap _term SIGTERM SIGINT
 
 
 ## remove pidfiles in case previous graceful termination failed
-# NOTE - This is the reason for the WARNING at the top - it's a bit hackish,
-#   but if it's good enough for Fedora (https://goo.gl/88eyXJ), it's good
-#   enough for me :)
 
 rm -f /var/run/elasticsearch/elasticsearch.pid /var/run/logstash.pid \
   /var/run/kibana5.pid
