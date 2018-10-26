@@ -1,7 +1,5 @@
 # Elasticsearch, Logstash, Kibana (ELK) Docker image documentation
 
-This web page documents how to use the [sebp/elk](https://hub.docker.com/r/sebp/elk/) Docker image, which provides a convenient centralised log server and log management web interface, by packaging [Elasticsearch](http://www.elasticsearch.org/), [Logstash](http://logstash.net/), and [Kibana](http://www.elasticsearch.org/overview/kibana/), collectively known as ELK.
-
 ### Contents ###
 
 - [Prerequisites](#prerequisites)
@@ -37,16 +35,6 @@ This web page documents how to use the [sebp/elk](https://hub.docker.com/r/sebp/
 	- [Elasticsearch is not starting (2): `cat: /var/log/elasticsearch/elasticsearch.log: No such file or directory`](#es-not-starting-not-enough-memory)
 	- [Elasticsearch is not starting (3): bootstrap tests](#es-not-starting-bootstrap-tests)
 	- [Elasticsearch is suddenly stopping after having started properly](#es-suddenly-stopping)
-	- [Miscellaneous](#issues-misc)
-- [Known issues](#known-issues)
-- [Troubleshooting](#troubleshooting)
-	- [If Elasticsearch isn't starting...](#es-not-starting)
-	- [If your log-emitting client doesn't seem to be able to reach Logstash...](#logstash-unreachable)
-	- [Additional tips](#general-troubleshooting)
-- [Reporting issues](#reporting-issues)
-- [Breaking changes](#breaking-changes)
-- [References](#references)
-- [About](#about)
 
 ## Prerequisites<a name="prerequisites"></a>
 
@@ -79,11 +67,11 @@ To run a container using this image, you will need the following:
 
 ## Installation <a name="installation"></a>
 
-To pull this image from the [Docker registry](https://hub.docker.com/r/sebp/elk/), open a shell prompt and enter:
+To pull this image from the [Docker registry](docker pull mikesatx/airties-elk/), open a shell prompt and enter:
 
-	$ sudo docker pull sebp/elk
+	$ sudo docker pull mikesatx/airties-elk
 
-**Note** – This image has been built automatically from the source files in the [source Git repository on GitHub](https://github.com/spujadas/elk-docker). If you want to build the image yourself, see the [Building the image](#building-image) section.
+**Note** – This image has been built automatically from the source files in the [source Git repository on GitHub](docker pull mikesatx/airties-elk).
 
 ### Pulling specific version combinations <a name="specific-version-combinations"></a> 
 
@@ -91,7 +79,7 @@ Specific version combinations of Elasticsearch, Logstash and Kibana can be pulle
 
 For instance, the image containing Elasticsearch 1.7.3, Logstash 1.5.5, and Kibana 4.1.2 (which is the last image using the Elasticsearch 1.x and Logstash 1.x branches) bears the tag `E1L1K4`, and can therefore be pulled using `sudo docker pull sebp/elk:E1L1K4`.
 
-The available tags are listed on [Docker Hub's sebp/elk image page](https://hub.docker.com/r/sebp/elk/) or GitHub repository page.
+The available tags are listed on [Docker Hub's mikesatx/airties-elk image page](docker pull mikesatx/airties-elk) or GitHub repository page.
 
 By default, if no tag is indicated (or if using the tag `latest`), the latest version of the image will be pulled.
 
@@ -294,7 +282,7 @@ Install [Filebeat](https://www.elastic.co/products/beats/filebeat) on the host y
 
 #### Example Filebeat set-up and configuration
 
-**Note** – The `nginx-filebeat` subdirectory of the [source Git repository on GitHub](https://github.com/spujadas/elk-docker) contains a sample `Dockerfile` which enables you to create a Docker image that implements the steps below.
+**Note** – The `nginx-filebeat` subdirectory of the [source Git repository on GitHub](mikesatx/airties-elk) contains a sample `Dockerfile` which enables you to create a Docker image that implements the steps below.
 
 Here is a sample `/etc/filebeat/filebeat.yml` configuration file for Filebeat, that forwards syslog and authentication logs, as well as [nginx](http://nginx.org/) logs.
 
@@ -327,8 +315,6 @@ You'll also need to copy the `logstash-beats.crt` file (which contains the certi
 **Note** – Alternatively, when using Filebeat on a Windows machine, instead of using the `certificate_authorities` configuration option, the certificate from `logstash-beats.crt` can be installed in Windows' Trusted Root Certificate Authorities store. 
 
 **Note** – The ELK image includes configuration items (`/etc/logstash/conf.d/11-nginx.conf` and `/opt/logstash/patterns/nginx`) to parse nginx access logs, as forwarded by the Filebeat instance above.
-
-If you're starting Filebeat for the first time, you should load the default index template in Elasticsearch. *At the time of writing, in version 6, loading the index template in Elasticsearch doesn't work, see [Known issues](#known-issues).*
 
 Start Filebeat:
 
@@ -393,7 +379,7 @@ With Compose here's what example entries for a (locally built log-generating) co
 
 ## Building the image <a name="building-image"></a>
 
-To build the Docker image from the source files, first clone the [Git repository](https://github.com/spujadas/elk-docker), go to the root of the cloned directory (i.e. the directory that contains `Dockerfile`), and:
+To build the Docker image from the source files, first clone the [Git repository](https://github.com/MPSAirties/airties-elk-docker), go to the root of the cloned directory (i.e. the directory that contains `Dockerfile`), and:
 
 - If you're using the vanilla `docker` command then run `sudo docker build -t <repository-name> .`, where `<repository-name>` is the repository name to be applied to the image, which you can then use to run the image with the `docker run` command.
 
@@ -498,8 +484,6 @@ This command mounts the named volume `elk-data` to `/var/lib/elasticsearch` (and
 See Docker's page on [Managing Data in Containers](https://docs.docker.com/engine/userguide/containers/dockervolumes/) and Container42's [Docker In-depth: Volumes](http://container42.com/2014/11/03/docker-indepth-volumes/) page for more information on managing data volumes.
 
 In terms of permissions, Elasticsearch data is created by the image's `elasticsearch` user, with UID 991 and GID 991.
-
-There is a [known situation](https://github.com/spujadas/elk-docker/issues/69) where SELinux denies access to the mounted volume when running in _enforcing_ mode. The workaround is to use the `setenforce 0` command to run SELinux in _permissive_ mode.
 
 ## Snapshot and restore <a name="snapshot-restore"></a>
 
@@ -788,63 +772,6 @@ Make sure that:
 
 	where `logstash-beats.crt` is the name of the file containing Logstash's self-signed certificate.
 
-### Additional tips <a name="general-troubleshooting"></a>
-
-If the suggestions given above don't solve your issue, then you should have a look at:
-
-- Your log-emitting client's logs.
-
-- ELK's logs, by `docker exec`'ing into the running container (see [Creating a dummy log entry](#creating-dummy-log-entry)), turning on stdout log (see [plugins-outputs-stdout](https://www.elastic.co/guide/en/logstash/current/plugins-outputs-stdout.html)), and checking Logstash's logs (located in `/var/log/logstash`), Elasticsearch's logs (in `/var/log/elasticsearch`), and Kibana's logs (in `/var/log/kibana`).
-
-	Note that ELK's logs are rotated daily and are deleted after a week, using logrotate. You can change this behaviour by overwriting the `elasticsearch`, `logstash` and `kibana` files in `/etc/logrotate.d`.  
-
-## Reporting issues <a name="reporting-issues"></a>
-
-**Important** – For _non-Docker-related_ issues with Elasticsearch, Kibana, and Elasticsearch, report the issues on the appropriate [Elasticsearch](https://github.com/elastic/elasticsearch), [Logstash](https://github.com/elastic/logstash), or [Kibana](https://github.com/elastic/kibana) GitHub repository. 
-
-You can report issues with this image using [GitHub's issue tracker](https://github.com/spujadas/elk-docker/issues) (please avoid raising issues as comments on Docker Hub, if only for the fact that the notification system is broken at the time of writing so there's a fair chance that I won't see it for a while).
-
-Bearing in mind that the first thing I'll need to do is reproduce your issue, please provide as much relevant information (e.g. logs, configuration files, what you were expecting and what you got instead, any troubleshooting steps that you took, what _is_ working) as possible for me to do that.
-
-[Pull requests](https://github.com/spujadas/elk-docker/pulls) are also welcome if you have found an issue and can solve it.
-
-## Breaking changes <a name="breaking changes"></a>
-
-Here is the list of breaking changes that may have side effects when upgrading to later versions of the ELK image: 
-
-- **`path.repo`**
-
-	*Applies to tags: after `623`.*
-
-	Elasticsearch's `path.repo` parameter is predefined as `/var/backups` in `elasticsearch.yml` (see [Snapshot and restore](#snapshot-restore)). 
-
-- **Version 6**
-
-	*Applies to tags: `600` and later.*
-
-	Breaking changes are introduced in version 6 of [Elasticsearch](https://www.elastic.co/guide/en/elasticsearch/reference/6.x/breaking-changes.html), [Logstash](https://www.elastic.co/guide/en/logstash/6.x/breaking-changes.html), and [Kibana](https://www.elastic.co/guide/en/kibana/6.x/breaking-changes.html).
-
-
-- **`ES_HEAP_SIZE` and `LS_HEAP_SIZE`**
-
-	*Applies to tags: `502` to `522`.*
-
-	Overriding the `ES_HEAP_SIZE` and `LS_HEAP_SIZE` environment variables has no effect on the heap size used by Elasticsearch and Logstash (see issue [#129](https://github.com/spujadas/elk-docker/issues/129)).
-
-- **Elasticsearch home directory**
-
-	*Applies to tags: `502` and later.*
-
-	Elasticsearch is no longer installed from the `deb` package (which attempts, in version 5.0.2, to modify system files that aren't accessible from a container); instead it is installed from the `tar.gz` package. 
-
-	As a consequence, Elasticsearch's home directory is now `/opt/elasticsearch` (was `/usr/share/elasticsearch`).  
-
-- **Version 5**
-
-	*Applies to tags: `es500_l500_k500` and later.*
-
-	Breaking changes are introduced in version 5 of [Elasticsearch](https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking-changes.html), [Logstash](https://www.elastic.co/guide/en/logstash/5.0/breaking-changes.html), and [Kibana](https://www.elastic.co/guide/en/kibana/5.0/breaking-changes.html).
-
 - **Private keys in PKCS#8 format**
 
 	*Applies to tags: `es240_l240_k460` and `es241_l240_k461`.*
@@ -890,19 +817,3 @@ Here is the list of breaking changes that may have side effects when upgrading t
 	- From `es500_l500_k500` onwards: add the `--config.reload.automatic` command-line option to `LS_OPTS`.
 
 	- From `es234_l234_k452` to `es241_l240_k461`: add `--auto-reload` to `LS_OPTS`. 
-
-## References <a name="references"></a>
-
-- [How To Install Elasticsearch, Logstash, and Kibana 4 on Ubuntu 14.04](https://www.digitalocean.com/community/tutorials/how-to-install-elasticsearch-logstash-and-kibana-4-on-ubuntu-14-04)
-- [The Docker Book](http://www.dockerbook.com/)
-- [The Logstash Book](http://www.logstashbook.com/)
-- [Elastic's reference documentation](https://www.elastic.co/guide/index.html):
-	- [Elasticsearch Reference](https://www.elastic.co/guide/en/elasticsearch/reference/current/index.html)
-	- [Logstash Reference](https://www.elastic.co/guide/en/logstash/current/index.html)
-	- [Kibana Reference](https://www.elastic.co/guide/en/kibana/current/index.html)
-	- [Filebeat Reference](https://www.elastic.co/guide/en/beats/filebeat/current/index.html)
-- [gosu, simple Go-based setuid+setgid+setgroups+exec](https://github.com/tianon/gosu), a convenient alternative to `USER` in Dockerfiles (see [Best practices for writing Dockerfiles](https://docs.docker.com/engine/userguide/eng-image/dockerfile_best-practices/#user))
-
-## About <a name="about"></a>
-
-Written by [Sébastien Pujadas](http://pujadas.net), released under the [Apache 2 license](http://www.apache.org/licenses/LICENSE-2.0).
